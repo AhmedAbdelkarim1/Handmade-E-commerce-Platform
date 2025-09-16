@@ -1,164 +1,158 @@
-﻿using DataAcess.Repos.IRepos;
+﻿using AutoMapper;
+using DataAcess.Repos.IRepos;
 using IdentityManager.Services.ControllerService.IControllerService;
-using Models.DTOs.image;
-using Models.Domain;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Models.DTOs;
-using AutoMapper;
 using Microsoft.AspNetCore.Http;
+using Models.Domain;
+using Models.DTOs;
 using Models.DTOs.Product;
 
 namespace IdentityManager.Services.ControllerService
 {
-    public class ProductService : IProductService
-    {
-        private readonly IProductRepository productRepo;
-        private readonly IImageRepository _imageRepo;
-        private readonly IMapper mapper;
-        private readonly ISearchService searchService;
+	public class ProductService : IProductService
+	{
+		private readonly IProductRepository productRepo;
+		private readonly IImageRepository _imageRepo;
+		private readonly IMapper mapper;
+		private readonly ISearchService searchService;
 
-        public ProductService(
-            IProductRepository productRepository, 
-            IImageRepository imageRepository, 
-            IMapper _mapper,
-            ISearchService _searchService)
-        {
-            productRepo = productRepository;
-            _imageRepo = imageRepository;
-            mapper = _mapper;
-            searchService = _searchService;
-        }
-        private void ValidateFileUpload(IFormFile File)
-        {
-            if (File == null)
-            {
-                throw new Exception("File is required");
-            }
-            if (File.Length == 0)
-            {
-                throw new Exception("File is empty");
-            }
-            if (File.Length > 10 * 1024 * 1024)
-            {
-                throw new Exception("File is too large");
-            }
-            if (File.ContentType != "image/jpeg" && File.ContentType != "image/png")
-            {
-                throw new Exception("File is not an image");
-            }
-        }
-        public async Task<int> UploadProductImageAsync(IFormFile File)
-        {
+		public ProductService(
+			IProductRepository productRepository,
+			IImageRepository imageRepository,
+			IMapper _mapper,
+			ISearchService _searchService)
+		{
+			productRepo = productRepository;
+			_imageRepo = imageRepository;
+			mapper = _mapper;
+			searchService = _searchService;
+		}
+		private void ValidateFileUpload(IFormFile File)
+		{
+			if (File == null)
+			{
+				throw new Exception("File is required");
+			}
+			if (File.Length == 0)
+			{
+				throw new Exception("File is empty");
+			}
+			if (File.Length > 10 * 1024 * 1024)
+			{
+				throw new Exception("File is too large");
+			}
+			if (File.ContentType != "image/jpeg" && File.ContentType != "image/png")
+			{
+				throw new Exception("File is not an image");
+			}
+		}
+		public async Task<int> UploadProductImageAsync(IFormFile File)
+		{
 
-            ValidateFileUpload(File);
+			ValidateFileUpload(File);
 
-            var image = new Image
-            {
-                File = File,
-                FileName = DateTime.Now.ToString("yyyyMMddHHmmssfff"),
-                FileExtension = Path.GetExtension(File.FileName),
-                FileSize = File.Length
-            };
+			var image = new Image
+			{
+				File = File,
+				FileName = DateTime.Now.ToString("yyyyMMddHHmmssfff"),
+				FileExtension = Path.GetExtension(File.FileName),
+				FileSize = File.Length
+			};
 
-            await _imageRepo.Upload(image);
+			await _imageRepo.Upload(image);
 
-            return image.Id;
-        }
+			return image.Id;
+		}
 
-        public async Task<IEnumerable<ProductDisplayDTO>> GetAllDisplayDTOs()
-        {
-            return mapper.Map<IEnumerable<ProductDisplayDTO>>(await productRepo.GetAllProducts());
-        }
+		public async Task<IEnumerable<ProductDisplayDTO>> GetAllDisplayDTOs()
+		{
+			return mapper.Map<IEnumerable<ProductDisplayDTO>>(await productRepo.GetAllProducts());
+		}
 
-        public async Task<ProductDisplayDTO?> GetById(int id)
-        {
-            Product? p = await productRepo.GetProductByIdAsync(id);
-            if (p == null)
-                return null;
-            return mapper.Map<ProductDisplayDTO>(p);
+		public async Task<ProductDisplayDTO?> GetById(int id)
+		{
+			Product? p = await productRepo.GetProductByIdAsync(id);
+			if (p == null)
+				return null;
+			return mapper.Map<ProductDisplayDTO>(p);
 
-        }
+		}
 
-        public async Task<ProductDisplayDTO> Create(ProductCreateDTO dto, string sellerId)
-        {
-            Product p = mapper.Map<Product>(dto);
-            p.ImageId = await UploadProductImageAsync(dto.File);
-            p.SellerId = sellerId;
-            await productRepo.CreateProductAsync(p);
-            await productRepo.SaveAsync();
-            
-            // Update embeddings for the new product
-            try
-            {
-                await searchService.UpdateProductEmbeddingsAsync(p.Id);
-            }
-            catch (Exception ex)
-            {
-                // Log the error but don't fail the product creation
-                Console.WriteLine($"Failed to update embeddings for new product {p.Id}: {ex.Message}");
-            }
-            
-            return mapper.Map<ProductDisplayDTO>(p);
-        }
+		public async Task<ProductDisplayDTO> Create(ProductCreateDTO dto, string sellerId)
+		{
+			Product p = mapper.Map<Product>(dto);
+			p.ImageId = await UploadProductImageAsync(dto.File);
+			p.SellerId = sellerId;
+			await productRepo.CreateProductAsync(p);
+			await productRepo.SaveAsync();
 
-        public async Task<ProductDisplayDTO> Update(ProductUpdateDTO dto)
-        {
-            Product? existing = await productRepo.GetProductByIdAsync(dto.Id);
-            if (existing == null)
-            {
-                return null;
-            }
-            mapper.Map(dto, existing);
-            if(dto.File != null)
-                existing.ImageId = await UploadProductImageAsync(dto.File);
-            await productRepo.UpdateProductAsync(existing);
-            await productRepo.SaveAsync();
-            
-            // Update embeddings for the updated product
-            try
-            {
-                await searchService.UpdateProductEmbeddingsAsync(existing.Id);
-            }
-            catch (Exception ex)
-            {
-                // Log the error but don't fail the product update
-                Console.WriteLine($"Failed to update embeddings for updated product {existing.Id}: {ex.Message}");
-            }
-            
-            return mapper.Map<ProductDisplayDTO>(existing);
-        }
+			// Update embeddings for the new product
+			try
+			{
+				await searchService.UpdateProductEmbeddingsAsync(p.Id);
+			}
+			catch (Exception ex)
+			{
+				// Log the error but don't fail the product creation
+				Console.WriteLine($"Failed to update embeddings for new product {p.Id}: {ex.Message}");
+			}
 
-        public async Task Delete(Product p)
-        {
-            await productRepo.DeleteProductAsync(p);
-            await productRepo.SaveAsync();
+			return mapper.Map<ProductDisplayDTO>(p);
+		}
+
+		public async Task<ProductDisplayDTO> Update(ProductUpdateDTO dto)
+		{
+			Product? existing = await productRepo.GetProductByIdAsync(dto.Id);
+			if (existing == null)
+			{
+				return null;
+			}
+			mapper.Map(dto, existing);
+			if (dto.File != null)
+				existing.ImageId = await UploadProductImageAsync(dto.File);
+			await productRepo.UpdateProductAsync(existing);
+			await productRepo.SaveAsync();
+
+			// Update embeddings for the updated product
+			try
+			{
+				await searchService.UpdateProductEmbeddingsAsync(existing.Id);
+			}
+			catch (Exception ex)
+			{
+				// Log the error but don't fail the product update
+				Console.WriteLine($"Failed to update embeddings for updated product {existing.Id}: {ex.Message}");
+			}
+
+			return mapper.Map<ProductDisplayDTO>(existing);
+		}
+
+		public async Task Delete(Product p)
+		{
+			await productRepo.DeleteProductAsync(p);
+			await productRepo.SaveAsync();
 
 
-        }
+		}
 
-        public async Task<IEnumerable<ProductDisplayDTO>> GetAllProductsBySeriviceId(int seriviceId)
-        {
-            return mapper.Map<IEnumerable<ProductDisplayDTO>>(await productRepo.GetAllProductsBySeriviceId(seriviceId));
-        }
-        public async Task<IEnumerable<ProductDisplayDTO>> GetAllProductsBySellerId(string sellerId)
-        {
-            return mapper.Map<IEnumerable<ProductDisplayDTO>>(await productRepo.GetAllProductsBySellerId(sellerId));
-        }
-        public async Task<Product?> UpdateProductStatusAsync(int id, UpdateProductStatusDTO dto)
-        {
-            var prod = await productRepo.UpdateProductStatusAsync(id, dto.Status);
-            await productRepo.SaveAsync();
-            return prod;
-        }
-        public async Task<Product?> UpdateProductReasonAsync(int id, ProductReasonDTO dto)
-        {
-            var prod = await productRepo.UpdateProductReasonAsync(id, dto.RejectionReason);
-            await productRepo.SaveAsync();
-            return prod;
-        }
-    }
+		public async Task<IEnumerable<ProductDisplayDTO>> GetAllProductsBySeriviceId(int seriviceId)
+		{
+			return mapper.Map<IEnumerable<ProductDisplayDTO>>(await productRepo.GetAllProductsBySeriviceId(seriviceId));
+		}
+		public async Task<IEnumerable<ProductDisplayDTO>> GetAllProductsBySellerId(string sellerId)
+		{
+			return mapper.Map<IEnumerable<ProductDisplayDTO>>(await productRepo.GetAllProductsBySellerId(sellerId));
+		}
+		public async Task<Product?> UpdateProductStatusAsync(int id, UpdateProductStatusDTO dto)
+		{
+			var prod = await productRepo.UpdateProductStatusAsync(id, dto.Status);
+			await productRepo.SaveAsync();
+			return prod;
+		}
+		public async Task<Product?> UpdateProductReasonAsync(int id, ProductReasonDTO dto)
+		{
+			var prod = await productRepo.UpdateProductReasonAsync(id, dto.RejectionReason);
+			await productRepo.SaveAsync();
+			return prod;
+		}
+	}
 }

@@ -1,87 +1,85 @@
 ﻿using AutoMapper;
+using Models.Const;
 using Models.Domain;
-using Models.DTOs;
-using Models.DTOs.User;
+using Models.DTOs.Categories;
 using Models.DTOs.CustomRequestDTO;
 using Models.DTOs.OrderDTO;
 using Models.DTOs.OrderItemDTO;
-using System;
-using Models.DTOs.Categories;
-using Models.Const;
-using Models.DTOs.Product;
+using Models.DTOs.User;
 
 namespace Models.DTOs.Mapper
 {
-    public class MappingConfig : Profile
-    {
-        public MappingConfig()
-        {
-            // User
-            CreateMap<ApplicationUser, UserDTO>().ReverseMap();
-            CreateMap<ApplicationUser, UserProfileDto>()
-                .AfterMap((src, dest) =>
+	public class MappingConfig : Profile
+	{
+		public MappingConfig()
+		{
+			// User
+			CreateMap<ApplicationUser, UserDTO>().ReverseMap();
+			CreateMap<ApplicationUser, UserProfileDto>()
+				.AfterMap((src, dest) =>
 				{
 					dest.Imageurl = src?.Image?.FilePath ?? "https://localhost:7047/images/avatar.png";
 				});
-            CreateMap<ApplicationUser, UserMangementDto>()
-                .ForMember(dest => dest.ProfileImageUrl, opt => opt.MapFrom(src => src.Image.FilePath))
-                .ForMember(dest => dest.IdCardImageUrl, opt => opt.MapFrom(src => src.IdCardImage.FilePath));
+			CreateMap<ApplicationUser, UserMangementDto>()
+				.ForMember(dest => dest.ProfileImageUrl, opt => opt.MapFrom(src => src.Image.FilePath))
+				.ForMember(dest => dest.IdCardImageUrl, opt => opt.MapFrom(src => src.IdCardImage.FilePath));
 
-				//.AfterMap((src, dest) =>
-				//{
-				//    dest.ProfileImageUrl = src?.Image?.FilePath;
-				//    dest.IdCardImageUrl = src?.IdCardImage?.FilePath;
-				//}).ReverseMap();
-				//Category
+			//.AfterMap((src, dest) =>
+			//{
+			//    dest.ProfileImageUrl = src?.Image?.FilePath;
+			//    dest.IdCardImageUrl = src?.IdCardImage?.FilePath;
+			//}).ReverseMap();
+			//Category
 			CreateMap<CreateCategoryDto, Category>().ReverseMap();
 
-            // Product
-            CreateMap<Models.Domain.Product, ProductDisplayDTO>()
+			// Product
+			CreateMap<Models.Domain.Product, ProductDisplayDTO>()
 
-                .AfterMap((src, dest) =>
-                {
+				.AfterMap((src, dest) =>
+				{
 					dest.ImageUrl = src?.Image?.FilePath;
 					dest.Category = src?.Service?.Name ?? string.Empty;
 					dest.SellerName = src?.User?.FullName;
-					
+
 				});
-            CreateMap<ProductDisplayDTO, Models.Domain.Product>(); 
+			CreateMap<ProductDisplayDTO, Models.Domain.Product>();
 
 
-            // ProductUpdateDTO <-> Product
-            CreateMap<ProductUpdateDTO, Models.Domain.Product>()
-                .AfterMap((src, dest) => {
-                    dest.Status = ProductStatus.Pending;
-                    dest.RejectionReason = null;
-                    });
+			// ProductUpdateDTO <-> Product
+			CreateMap<ProductUpdateDTO, Models.Domain.Product>()
+				.AfterMap((src, dest) =>
+				{
+					dest.Status = ProductStatus.Pending;
+					dest.RejectionReason = null;
+				});
 
-            CreateMap<Models.Domain.Product, ProductUpdateDTO>();
-
-
-            // ProductCreateDTO -> Product
-            CreateMap<ProductCreateDTO, Models.Domain.Product>()
-                .AfterMap((src, dest) => dest.Status = ProductStatus.Approved);
-
-            
-
-            // Order
-            CreateMap<Order, OrderReadDto>();
-            CreateMap<OrderCreateDto, Order>();
-            CreateMap<OrderUpdateDto, Order>();
-
-            // OrderItem
-            CreateMap<OrderItem, OrderItemReadDto>();
-            CreateMap<OrderItemCreateDto, OrderItem>();
-
-            // CustomRequest
-            CreateMap<CustomRequest, CustomRequestReadDto>();
-            CreateMap<CustomRequestCreateDto, CustomRequest>();
-            CreateMap<CustomRequestUpdateDto, CustomRequest>();
+			CreateMap<Models.Domain.Product, ProductUpdateDTO>();
 
 
-            // customer order
-            CreateMap<CustomerOrder, OrderResponse>()
-            .ForMember(d => d.CustomerName, o => o.MapFrom(s => s.Customer.FullName));
-        }
-    }
+			// ProductCreateDTO -> Product
+			CreateMap<ProductCreateDTO, Models.Domain.Product>()
+				.AfterMap((src, dest) => dest.Status = ProductStatus.Approved);
+
+
+
+			// Order
+			CreateMap<Order, OrderReadDto>();
+			CreateMap<OrderCreateDto, Order>();
+			CreateMap<OrderUpdateDto, Order>();
+
+			// OrderItem
+			CreateMap<OrderItem, OrderItemReadDto>();
+			CreateMap<OrderItemCreateDto, OrderItem>();
+
+			// CustomRequest
+			CreateMap<CustomRequest, CustomRequestReadDto>();
+			CreateMap<CustomRequestCreateDto, CustomRequest>();
+			CreateMap<CustomRequestUpdateDto, CustomRequest>();
+
+
+			// customer order
+			CreateMap<CustomerOrder, OrderResponse>()
+			.ForMember(d => d.CustomerName, o => o.MapFrom(s => s.Customer.FullName));
+		}
+	}
 }

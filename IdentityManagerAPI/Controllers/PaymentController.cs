@@ -1,14 +1,11 @@
-﻿using IdentityManager.Services.ControllerService.IControllerService;
-using Microsoft.AspNetCore.Authorization;
-using System.Security.Claims;
-using System.Text.Json;
+﻿using System.Security.Claims;
 using System.Text;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.ViewFeatures;
+using System.Text.Json;
 using DataAcess;
 using DataAcess.Repos.IRepos;
-using Aspose.Slides.Export;
+using IdentityManager.Services.ControllerService.IControllerService;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 
 namespace IdentityManagerAPI.Controllers
 {
@@ -59,7 +56,7 @@ namespace IdentityManagerAPI.Controllers
 				var amount = order.TotalPrice;
 				decimal totalAmount = amount; // Initialize totalAmount with the default value of amount.
 
-				
+
 
 				if (string.IsNullOrWhiteSpace(paymentMethod))
 					return BadRequest("Payment method is required.");

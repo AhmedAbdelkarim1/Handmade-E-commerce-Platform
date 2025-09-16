@@ -6,11 +6,6 @@ using Models.Const;
 using Models.Domain;
 using Models.DTOs.image;
 using Models.DTOs.User;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace IdentityManager.Services.ControllerService
 {
@@ -113,25 +108,25 @@ namespace IdentityManager.Services.ControllerService
 				throw new Exception("File is required");
 			}
 			if (request.ProfileImage.Length == 0 || request.IdCardImage.Length == 0)
-            {
-                throw new Exception("File is empty");
-            }
-            if (request.ProfileImage.Length > 10 * 1024 * 1024 || request.IdCardImage.Length > 10 * 1024 * 1024)
-            {
-                throw new Exception("File is too large");
-            }
-            if ((request.ProfileImage.ContentType != "image/jpeg" && request.ProfileImage.ContentType != "image/png")
+			{
+				throw new Exception("File is empty");
+			}
+			if (request.ProfileImage.Length > 10 * 1024 * 1024 || request.IdCardImage.Length > 10 * 1024 * 1024)
+			{
+				throw new Exception("File is too large");
+			}
+			if ((request.ProfileImage.ContentType != "image/jpeg" && request.ProfileImage.ContentType != "image/png")
 				|| (request.IdCardImage.ContentType != "image/jpeg" && request.IdCardImage.ContentType != "image/png"))
-            {
-                throw new Exception("File is not an image");
-            }
-        }
+			{
+				throw new Exception("File is not an image");
+			}
+		}
 
 		public async Task DeleteUser(string userId)
 		{
 			var user = await _userRepo.GetUserByID(userId);
-            user.IsDeleted = !user.IsDeleted;
-            user.LastUpdatedOn = DateTime.Now;
+			user.IsDeleted = !user.IsDeleted;
+			user.LastUpdatedOn = DateTime.Now;
 			await _userRepo.UpdateUser(user);
 		}
 

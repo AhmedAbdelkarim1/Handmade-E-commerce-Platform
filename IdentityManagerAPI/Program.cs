@@ -10,12 +10,9 @@ using IdentityManagerAPI;
 using IdentityManagerAPI.Middlewares;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Identity.UI.Services;
-using Microsoft.AspNetCore.OpenApi;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.FileProviders;
 using Microsoft.IdentityModel.Tokens;
-using Microsoft.OpenApi.Models;
 using Models.Domain;
 using Models.Domain.Settings;
 using Models.DTOs.Mapper;
@@ -34,12 +31,12 @@ builder.Services.AddHttpContextAccessor();
 
 // Add database context
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+	options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 // Configure Identity
 builder.Services.AddIdentity<ApplicationUser, IdentityRole>()
-    .AddEntityFrameworkStores<ApplicationDbContext>()
-    .AddDefaultTokenProviders();
+	.AddEntityFrameworkStores<ApplicationDbContext>()
+	.AddDefaultTokenProviders();
 
 //Email
 builder.Services.Configure<MailSettings>(builder.Configuration.GetSection(nameof(MailSettings)));
@@ -88,7 +85,7 @@ builder.Services.AddScoped<IProductService, ProductService>();
 builder.Services.AddScoped<IOrderRepository, OrderRepository>();
 builder.Services.AddScoped<IOrderItemRepository, OrderItemRepository>();
 builder.Services.AddScoped<ICustomRequestRepository, CustomRequestRepository>();
-builder.Services.AddScoped<ICartRepository,CartRepository>();
+builder.Services.AddScoped<ICartRepository, CartRepository>();
 builder.Services.AddScoped<ICartItemRepository, CartItemRepository>();
 
 
@@ -105,16 +102,16 @@ builder.Services.AddScoped<ICustomerRequestService, CustomerRequestService>();
 builder.Services.AddHttpClient();
 builder.Services.AddSingleton<CohereEmbedder>(provider =>
 {
-    var httpClient = provider.GetRequiredService<HttpClient>();
-    var apiKey = builder.Configuration["Cohere:ApiKey"] ?? "KD2nozebMtBawxWruHYQe6Z2oZ4IQn4YhugsQNdU";
-    return new CohereEmbedder(httpClient, apiKey);
+	var httpClient = provider.GetRequiredService<HttpClient>();
+	var apiKey = builder.Configuration["Cohere:ApiKey"] ?? "KD2nozebMtBawxWruHYQe6Z2oZ4IQn4YhugsQNdU";
+	return new CohereEmbedder(httpClient, apiKey);
 });
 builder.Services.AddScoped<ISearchService, SearchService>();
 
 // Add OpenAPI with Bearer Authentication Support
 builder.Services.AddOpenApi("v1", options =>
 {
-    options.AddDocumentTransformer<BearerSecuritySchemeTransformer>();
+	options.AddDocumentTransformer<BearerSecuritySchemeTransformer>();
 });
 
 
@@ -123,19 +120,19 @@ builder.Services.AddOpenApi("v1", options =>
 var key = Encoding.ASCII.GetBytes(builder.Configuration["ApiSettings:Secret"]);
 builder.Services.AddAuthentication(options =>
 {
-    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+	options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+	options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
 })
 .AddJwtBearer(options =>
 {
-    options.TokenValidationParameters = new TokenValidationParameters
-    {
-        ValidateIssuerSigningKey = true,
-        IssuerSigningKey = new SymmetricSecurityKey(key),
-        ValidateIssuer = false,
-        ValidateAudience = false,
-        ClockSkew = TimeSpan.FromDays(7)
-    };
+	options.TokenValidationParameters = new TokenValidationParameters
+	{
+		ValidateIssuerSigningKey = true,
+		IssuerSigningKey = new SymmetricSecurityKey(key),
+		ValidateIssuer = false,
+		ValidateAudience = false,
+		ClockSkew = TimeSpan.FromDays(7)
+	};
 });
 
 
@@ -144,13 +141,13 @@ builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
 builder.Services.AddProblemDetails();
 builder.Services.AddCors(options =>
 {
-    options.AddDefaultPolicy(policy =>
-    {
-        policy.AllowAnyHeader()
-              .AllowAnyMethod()
-              .SetIsOriginAllowed(_ => true)
-              .AllowCredentials();
-    });
+	options.AddDefaultPolicy(policy =>
+	{
+		policy.AllowAnyHeader()
+			  .AllowAnyMethod()
+			  .SetIsOriginAllowed(_ => true)
+			  .AllowCredentials();
+	});
 });
 
 
@@ -160,8 +157,8 @@ app.MapHub<ChatHub>("/chat");
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
-    app.MapOpenApi();
-    app.MapScalarApiReference();
+	app.MapOpenApi();
+	app.MapScalarApiReference();
 }
 
 // Use the global exception handler
@@ -169,13 +166,13 @@ app.UseExceptionHandler();
 
 app.UseHttpsRedirection();
 app.UseCors();
-app.UseAuthentication(); 
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.UseStaticFiles(new StaticFileOptions
 {
-    FileProvider = new PhysicalFileProvider(Path.Combine(Directory.GetCurrentDirectory(), "Images")),
-    RequestPath = "/Images"
+	FileProvider = new PhysicalFileProvider(Path.Combine(Directory.GetCurrentDirectory(), "Images")),
+	RequestPath = "/Images"
 });
 
 using var scope = app.Services.CreateScope();

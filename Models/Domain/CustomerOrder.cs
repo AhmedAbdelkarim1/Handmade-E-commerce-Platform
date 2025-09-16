@@ -1,26 +1,21 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations.Schema;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Models.Domain
 {
-    public class CustomerOrder
-    {
-        public int Id { get; set; }
-        public string CustomerId { get; set; } = null!;
-        [ForeignKey(nameof(CustomerId))]
-        public ApplicationUser Customer { get; set; } = null!;
-        public string PhoneNumber { get; set; } = null!;
-        public string Address { get; set; } = null!;
-        public string PaymentMethod { get; set; } = null!;
-        public string PaymentStatus { get; set; } = "Pending";
+	public class CustomerOrder
+	{
+		public int Id { get; set; }
+		public string CustomerId { get; set; } = null!;
+		[ForeignKey(nameof(CustomerId))]
+		public ApplicationUser Customer { get; set; } = null!;
+		public string PhoneNumber { get; set; } = null!;
+		public string Address { get; set; } = null!;
+		public string PaymentMethod { get; set; } = null!;
+		public string PaymentStatus { get; set; } = "Pending";
 		public decimal TotalAmount { get; set; }
 		public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
 		public Payment? Payment { get; set; }
-        public List<CustomerOrderItem> Items { get; set; } = new();
-    }
+		public List<CustomerOrderItem> Items { get; set; } = new();
+	}
 }

@@ -1,25 +1,18 @@
-﻿using DataAcess.Repos.IRepos;
+﻿using System.ComponentModel.DataAnnotations;
+using System.Net;
+using DataAcess.Repos.IRepos;
 using IdentityManager.Services.ControllerService.IControllerService;
-using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Mvc;
 using Models.Domain;
 using Models.DTOs.Auth;
-using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
-using System.Linq;
-using System.Net;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace IdentityManager.Services.ControllerService
 {
-    public class AuthService : IAuthService
-    {
-        private readonly IUserRepository _userRepository;
-        private readonly IMailingService _mailingService;
-        private readonly UserManager<ApplicationUser> _userManager;
+	public class AuthService : IAuthService
+	{
+		private readonly IUserRepository _userRepository;
+		private readonly IMailingService _mailingService;
+		private readonly UserManager<ApplicationUser> _userManager;
 
 		public AuthService(IUserRepository userRepository, IMailingService mailingService, UserManager<ApplicationUser> userManager)
 		{
@@ -29,12 +22,12 @@ namespace IdentityManager.Services.ControllerService
 		}
 
 		public async Task<object> LoginAsync(LoginRequestDTO loginRequestDTO)
-        {
-            return await _userRepository.Login(loginRequestDTO);
-        }
+		{
+			return await _userRepository.Login(loginRequestDTO);
+		}
 
-        public async Task ValidateUserNameAndEmail(string Email, string userName)
-        {
+		public async Task ValidateUserNameAndEmail(string Email, string userName)
+		{
 			var emailExist = await _userRepository.GetAsync(user => user.Email == Email);
 			var usernameExist = await _userRepository.IsUniqueUserName(userName);
 			if (!usernameExist)
@@ -47,27 +40,27 @@ namespace IdentityManager.Services.ControllerService
 			}
 		}
 
-        public async Task<object> RegisterAdminAsync(RegisterRequestDTO registerRequestDTO)
-        {
-            await ValidateUserNameAndEmail(registerRequestDTO.Email, registerRequestDTO.UserName);
+		public async Task<object> RegisterAdminAsync(RegisterRequestDTO registerRequestDTO)
+		{
+			await ValidateUserNameAndEmail(registerRequestDTO.Email, registerRequestDTO.UserName);
 			return await _userRepository.RegisterAdmin(registerRequestDTO);
-        }
-        public async Task<object> RegisterSellerAsync(SellerRegisterDto sellerRegisterDto)
-        {
+		}
+		public async Task<object> RegisterSellerAsync(SellerRegisterDto sellerRegisterDto)
+		{
 			await ValidateUserNameAndEmail(sellerRegisterDto.Email, sellerRegisterDto.UserName);
-            var nationalIdExist = await _userRepository.GetAsync(user => user.NationalId == sellerRegisterDto.NationalId);
+			var nationalIdExist = await _userRepository.GetAsync(user => user.NationalId == sellerRegisterDto.NationalId);
 			if (nationalIdExist != null)
-            {
+			{
 				throw new ValidationException("National ID Already exists");
 			}
 
-				return await _userRepository.RegisterSeller(sellerRegisterDto);
-        }
-        public async Task<object> RegisterCustomerAsync(CustomerRegisterDto customerRegisterDto)
-        {
+			return await _userRepository.RegisterSeller(sellerRegisterDto);
+		}
+		public async Task<object> RegisterCustomerAsync(CustomerRegisterDto customerRegisterDto)
+		{
 			await ValidateUserNameAndEmail(customerRegisterDto.Email, customerRegisterDto.UserName);
 			return await _userRepository.RegisterCustomer(customerRegisterDto);
-        }
+		}
 
 		public async Task<object> ForgotPasswordAsync(ForgotPasswordRequestDto forgotPasswordRequestDto)
 		{

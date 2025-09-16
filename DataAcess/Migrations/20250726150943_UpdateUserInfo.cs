@@ -4,12 +4,12 @@
 
 namespace DataAcess.Migrations
 {
-    /// <inheritdoc />
-    public partial class UpdateUserInfo : Migration
-    {
-        /// <inheritdoc />
-        protected override void Up(MigrationBuilder migrationBuilder)
-        {
+	/// <inheritdoc />
+	public partial class UpdateUserInfo : Migration
+	{
+		/// <inheritdoc />
+		protected override void Up(MigrationBuilder migrationBuilder)
+		{
 			migrationBuilder.Sql("UPDATE AspNetUsers SET HasWhatsApp = 0 WHERE HasWhatsApp IS NULL");
 
 			// ثانيًا: نعدل نوع العمود إلى not null + default = false
@@ -24,9 +24,9 @@ namespace DataAcess.Migrations
 				oldNullable: true);
 		}
 
-        /// <inheritdoc />
-        protected override void Down(MigrationBuilder migrationBuilder)
-        {
+		/// <inheritdoc />
+		protected override void Down(MigrationBuilder migrationBuilder)
+		{
 			migrationBuilder.AlterColumn<bool>(
 			name: "HasWhatsApp",
 			table: "AspNetUsers",
@@ -36,5 +36,5 @@ namespace DataAcess.Migrations
 			oldType: "bit",
 			oldNullable: false);
 		}
-    }
+	}
 }

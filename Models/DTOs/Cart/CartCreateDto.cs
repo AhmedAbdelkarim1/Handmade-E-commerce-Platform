@@ -1,13 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace Models.DTOs.Cart
+﻿namespace Models.DTOs.Cart
 {
-    public class CartCreateDto
-    {
-        public string BuyerId { get; set; }
-    }
+	public class CartCreateDto
+	{
+		public string BuyerId { get; set; }
+	}
 }
