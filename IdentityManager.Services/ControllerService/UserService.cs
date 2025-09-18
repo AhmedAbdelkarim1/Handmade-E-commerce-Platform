@@ -30,20 +30,15 @@ namespace IdentityManager.Services.ControllerService
 			var userDto = _mapper.Map<UserProfileDto>(user);
 			return userDto;
 		}
-		public async Task<IEnumerable<UserMangementDto>> GetAllUsers()
+		public async Task<IEnumerable<UserMangementDto>> GetAllUsers(string? status = null)
 		{
-			var users = await _userRepo.GetAllAsync();
-			var usersDto = new List<UserMangementDto>();
-			foreach (var user in users)
+			if (!string.IsNullOrWhiteSpace(status))
 			{
-				var roles = await _userManager.GetRolesAsync(user);
-
-				var userDto = _mapper.Map<UserMangementDto>(user);
-				userDto.Roles = roles.ToList();
-
-				usersDto.Add(userDto);
+				var filteredUsers = await _userRepo.GetAllAsync(u => u.Status.ToLower() == status.ToLower());
+				return _mapper.Map<IEnumerable<UserMangementDto>>(filteredUsers);
 			}
-			return usersDto;
+			var users = await _userRepo.GetAllAsync();
+			return _mapper.Map<IEnumerable<UserMangementDto>>(users);
 		}
 
 		public async Task<IEnumerable<UserMangementDto>> GetAllPendingSellers()

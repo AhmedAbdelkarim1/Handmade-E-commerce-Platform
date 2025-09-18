@@ -45,7 +45,7 @@ namespace Models.DTOs.Mapper
 			CreateMap<ProductDisplayDTO, Models.Domain.Product>();
 
 
-			// ProductUpdateDTO <-> Product
+			// ProductUpdateDTO <-> Product	
 			CreateMap<ProductUpdateDTO, Models.Domain.Product>()
 				.AfterMap((src, dest) =>
 				{

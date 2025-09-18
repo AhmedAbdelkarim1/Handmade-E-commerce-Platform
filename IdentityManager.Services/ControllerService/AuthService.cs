@@ -45,7 +45,7 @@ namespace IdentityManager.Services.ControllerService
 			await ValidateUserNameAndEmail(registerRequestDTO.Email, registerRequestDTO.UserName);
 			return await _userRepository.RegisterAdmin(registerRequestDTO);
 		}
-		public async Task<object> RegisterSellerAsync(SellerRegisterDto sellerRegisterDto)
+		public async Task<object> RegisterSellerAsync(RegisterRequestDTO sellerRegisterDto)
 		{
 			await ValidateUserNameAndEmail(sellerRegisterDto.Email, sellerRegisterDto.UserName);
 			var nationalIdExist = await _userRepository.GetAsync(user => user.NationalId == sellerRegisterDto.NationalId);
@@ -56,7 +56,7 @@ namespace IdentityManager.Services.ControllerService
 
 			return await _userRepository.RegisterSeller(sellerRegisterDto);
 		}
-		public async Task<object> RegisterCustomerAsync(CustomerRegisterDto customerRegisterDto)
+		public async Task<object> RegisterCustomerAsync(RegisterRequestDTO customerRegisterDto)
 		{
 			await ValidateUserNameAndEmail(customerRegisterDto.Email, customerRegisterDto.UserName);
 			return await _userRepository.RegisterCustomer(customerRegisterDto);

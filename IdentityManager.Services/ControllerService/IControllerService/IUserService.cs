@@ -7,7 +7,7 @@ namespace IdentityManager.Services.ControllerService.IControllerService
 	{
 		Task<object> UploadUserImageAsync(string userId, ImageUploadRequestDto request);
 		Task<UserProfileDto> GetById(string userId);
-		Task<IEnumerable<UserMangementDto>> GetAllUsers();
+		Task<IEnumerable<UserMangementDto>> GetAllUsers(string? status = null);
 		Task DeleteUser(string userId);
 		Task ChangeSellerStatus(string userId, string status);
 		Task<IEnumerable<UserMangementDto>> GetAllPendingSellers();

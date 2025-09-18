@@ -4,20 +4,16 @@ namespace Models.DTOs.Auth
 {
 	public class RegisterRequestDTO
 	{
-		[Required]
-		[MinLength(3, ErrorMessage = "The length must be more than 3.")]
-		[RegularExpression("^[a-zA-Z0-9-.@+]*$", ErrorMessage = "Username can only contain letters or digits")]
-		public string UserName { get; set; } = null!;
-		[Required]
-		[MinLength(3, ErrorMessage = "The length must be more than 3.")]
-		[RegularExpression("^[a-zA-Z-_ ]*$", ErrorMessage = "Only english letters are allowed.")]
-		public string Name { get; set; } = null!;
-		[Required]
-		[EmailAddress]
-		public string Email { get; set; } = null!;
-		[Required]
-		[RegularExpression("(?=(.*[0-9]))(?=.*[\\!@#$%^&*()\\\\[\\]{}\\-_+=~`|:;\"'<>,./?])(?=.*[a-z])(?=(.*[A-Z]))(?=(.*)).{8,}"
-			, ErrorMessage = "Passwords must contain an uppercase character, lowercase character, a digit, and a non-alphanumeric character. Passwords must be at least eight characters long.")]
-		public string Password { get; set; } = null!;
+		public string UserName { get; set; }
+		public string Name { get; set; }
+		public string Email { get; set; }
+		public string Password { get; set; }
+		public string UserType { get; set; }
+
+		public bool? HasWhatsApp { get; set; }
+		public string? Address { get; set; }
+		public string? MobileNumber { get; set; }
+		public string? NationalId { get; set; } 
+		public string? Bio { get; set; } 
 	}
 }

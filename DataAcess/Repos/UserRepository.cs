@@ -122,7 +122,7 @@ namespace DataAcess.Repos
 			return userDTO;
 		}
 
-		public async Task<UserDTO> RegisterCustomer(CustomerRegisterDto customerRegisterDto)
+		public async Task<UserDTO> RegisterCustomer(RegisterRequestDTO customerRegisterDto)
 		{
 			var user = new ApplicationUser
 			{
@@ -158,7 +158,7 @@ namespace DataAcess.Repos
 			return userDTO;
 		}
 
-		public async Task<UserDTO> RegisterSeller(SellerRegisterDto sellerRegisterDto)
+		public async Task<UserDTO> RegisterSeller(RegisterRequestDTO sellerRegisterDto)
 		{
 			var user = new ApplicationUser
 			{
