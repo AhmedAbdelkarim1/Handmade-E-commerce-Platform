@@ -3,8 +3,10 @@ using System.Net;
 using DataAcess.Repos.IRepos;
 using IdentityManager.Services.ControllerService.IControllerService;
 using Microsoft.AspNetCore.Identity;
+using Models.Const;
 using Models.Domain;
 using Models.DTOs.Auth;
+using Models.DTOs.User;
 
 namespace IdentityManager.Services.ControllerService
 {
@@ -21,45 +23,27 @@ namespace IdentityManager.Services.ControllerService
 			_userManager = userManager;
 		}
 
-		public async Task<object> LoginAsync(LoginRequestDTO loginRequestDTO)
+		public async Task<LoginResponseDTO> LoginAsync(LoginRequestDTO loginRequestDTO)
 		{
 			return await _userRepository.Login(loginRequestDTO);
-		}
+		}		
 
-		public async Task ValidateUserNameAndEmail(string Email, string userName)
+		public async Task<UserDTO> RegisterAsync(RegisterRequestDTO registerRequestDTO)
 		{
-			var emailExist = await _userRepository.GetAsync(user => user.Email == Email);
-			var usernameExist = await _userRepository.IsUniqueUserName(userName);
-			if (!usernameExist)
+			switch (registerRequestDTO.UserType.ToLower())
 			{
-				throw new ValidationException("Username Already exists");
-			}
-			if (emailExist != null)
-			{
-				throw new ValidationException("Email Already exists");
-			}
-		}
+				case AppRoles.Admin:
+					return await _userRepository.RegisterAdmin(registerRequestDTO);
 
-		public async Task<object> RegisterAdminAsync(RegisterRequestDTO registerRequestDTO)
-		{
-			await ValidateUserNameAndEmail(registerRequestDTO.Email, registerRequestDTO.UserName);
-			return await _userRepository.RegisterAdmin(registerRequestDTO);
-		}
-		public async Task<object> RegisterSellerAsync(RegisterRequestDTO sellerRegisterDto)
-		{
-			await ValidateUserNameAndEmail(sellerRegisterDto.Email, sellerRegisterDto.UserName);
-			var nationalIdExist = await _userRepository.GetAsync(user => user.NationalId == sellerRegisterDto.NationalId);
-			if (nationalIdExist != null)
-			{
-				throw new ValidationException("National ID Already exists");
-			}
+				case AppRoles.Customer:
+					return await _userRepository.RegisterCustomer(registerRequestDTO);
 
-			return await _userRepository.RegisterSeller(sellerRegisterDto);
-		}
-		public async Task<object> RegisterCustomerAsync(RegisterRequestDTO customerRegisterDto)
-		{
-			await ValidateUserNameAndEmail(customerRegisterDto.Email, customerRegisterDto.UserName);
-			return await _userRepository.RegisterCustomer(customerRegisterDto);
+				case AppRoles.Seller:
+					return await _userRepository.RegisterSeller(registerRequestDTO);
+
+				default:
+					throw new ValidationException("Invalid user type.");
+            }
 		}
 
 		public async Task<object> ForgotPasswordAsync(ForgotPasswordRequestDto forgotPasswordRequestDto)
@@ -109,5 +93,5 @@ namespace IdentityManager.Services.ControllerService
 			}
 			return Task.FromResult<object>(new { message = "Password reset successfully." });
 		}
-	}
+    }
 }

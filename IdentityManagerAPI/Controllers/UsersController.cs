@@ -1,13 +1,14 @@
-﻿using System.Security.Claims;
-using DataAcess;
-using DataAcess.Repos.IRepos;
-using IdentityManager.Services.ControllerService;
+﻿using System.ComponentModel.DataAnnotations;
+using System.Security.Claims;
+using Ardalis.GuardClauses;
+using FluentValidation;
 using IdentityManager.Services.ControllerService.IControllerService;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Models.Domain;
 using Models.DTOs.Auth;
 using Models.DTOs.image;
+using ValidationException = FluentValidation.ValidationException;
 
 namespace IdentityManagerAPI.Controllers
 {
@@ -17,14 +18,16 @@ namespace IdentityManagerAPI.Controllers
 	{
 		private readonly IUserService userService;
 		private readonly IAuthService _authService;
+		private readonly IValidator<RegisterRequestDTO> _validator;
 
-		public UsersController(IUserService userService, IAuthService authService)
-		{
-			this.userService = userService;
-			_authService = authService;
-		}
+        public UsersController(IUserService userService, IAuthService authService, IValidator<RegisterRequestDTO> validator)
+        {
+            this.userService = userService;
+            _authService = authService;
+            _validator = validator;
+        }
 
-		[HttpGet]
+        [HttpGet]
 		//[Authorize(Roles = "Admin")]
 		public async Task<IActionResult> GetAllUsers([FromQuery] string? status)
 		{
@@ -42,8 +45,12 @@ namespace IdentityManagerAPI.Controllers
 		[HttpPost]
 		public async Task<IActionResult> Register([FromBody] RegisterRequestDTO registerRequestDTO)
 		{
-			var result = await _authService.RegisterAdminAsync(registerRequestDTO);
-			return Ok(result);
+			var ValidationResult = await _validator.ValidateAsync(registerRequestDTO);
+            if (!ValidationResult.IsValid)
+				throw new ValidationException(ValidationResult.Errors);	
+
+            var result = await _authService.RegisterAsync(registerRequestDTO);
+            return Ok(result);
 		}
 
 		[HttpPut("{sellerId}/status")]

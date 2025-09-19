@@ -1,9 +1,9 @@
-using System.Text;
 using DataAcess;
 using DataAcess.Repos;
 using DataAcess.Repos.IRepos;
 using DataAcess.Seeds;
 using DataAcess.Services;
+using FluentValidation;
 using IdentityManager.Services.ControllerService;
 using IdentityManager.Services.ControllerService.IControllerService;
 using IdentityManagerAPI;
@@ -19,6 +19,8 @@ using Models.DTOs.Mapper;
 using Scalar.AspNetCore;
 using Services;
 using StackExchange.Redis;
+using System.Reflection;
+using System.Text;
 using X.Paymob.CashIn;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -96,7 +98,8 @@ builder.Services.AddScoped<ICustomerOrderService, CustomerOrderService>();
 // Add Custom Request Service
 builder.Services.AddScoped<ICustomerRequestService, CustomerRequestService>();
 
-
+//fluent validation
+builder.Services.AddValidatorsFromAssembly(Assembly.GetExecutingAssembly());
 
 // Add AI Search Services
 builder.Services.AddHttpClient();

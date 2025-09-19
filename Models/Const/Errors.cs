@@ -18,6 +18,7 @@ namespace Models.Const
 		public const string InvalidNationalId = "Invalid national ID.";
 		public const string OnlyNumbersAndLetters = "Only Arabic/English letters or digits are allowed.";
 		public const string OnlyEnglishLetters = "Only English letters are allowed.";
+        public const string Duplicated = "Another record with the same {PropertyName} is already exists!";
 
-	}
+    }
 }

@@ -14,6 +14,6 @@ namespace DataAcess.Repos.IRepos
 		Task<ApplicationUser> GetUserByID(string userID);
 		Task<bool> UpdateAsync(ApplicationUser user);
 		Task UpdateUser(ApplicationUser user);
-
-	}
+        
+    }
 }
