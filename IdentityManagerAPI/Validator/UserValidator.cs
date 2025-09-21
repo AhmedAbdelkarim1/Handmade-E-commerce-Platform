@@ -11,30 +11,31 @@ namespace IdentityManagerAPI.Validator
 
         public UserValidator(IUserRepository userRepository)
         {
+            RuleLevelCascadeMode = CascadeMode.Stop;
             _userRepository = userRepository;
 
             RuleFor(u => u.UserName)
-                .MustAsync(async (username, cancellationToken) =>
-                !await _userRepository.IsExistsAsync(u => u.UserName == username))
-                .WithMessage(Errors.Duplicated)
-
                 .NotEmpty().WithMessage(Errors.RequiredField)
                 .MinimumLength(3).WithMessage(Errors.MinLength)
-                .Matches(RegexPatterns.NumbersAndChrOnly_ArEng).WithMessage(Errors.OnlyNumbersAndLetters);
+                .Matches(RegexPatterns.NumbersAndChrOnly_ArEng).WithMessage(Errors.OnlyNumbersAndLetters)
 
+                .MustAsync(async (username, cancellationToken) =>
+                !await _userRepository.IsExistsAsync(u => u.UserName == username))
+                .WithMessage(Errors.Duplicated);
+                
             RuleFor(u => u.Name)
                 .NotEmpty().WithMessage(Errors.RequiredField)
                 .MinimumLength(3).WithMessage(Errors.MinLength)
                 .Matches(RegexPatterns.CharactersOnly_Eng).WithMessage(Errors.OnlyEnglishLetters);
 
             RuleFor(u => u.Email)
-                .MustAsync(async (email, cancellationToken) =>
-                !await _userRepository.IsExistsAsync(u => u.Email == email))
-                .WithMessage(Errors.Duplicated)
-
                 .NotEmpty().WithMessage(Errors.RequiredField)
                 .MaximumLength(120).WithMessage(Errors.MaxLength)
-                .EmailAddress();
+                .EmailAddress()
+
+                .MustAsync(async (email, cancellationToken) =>
+                !await _userRepository.IsExistsAsync(u => u.Email == email))
+                .WithMessage(Errors.Duplicated);
 
             RuleFor(u => u.Password)
                 .NotEmpty().WithMessage(Errors.RequiredField)
@@ -46,40 +47,23 @@ namespace IdentityManagerAPI.Validator
 
             When(u => u.UserType.ToLower() == AppRoles.Customer.ToLower(), () =>
             {
-                RuleFor(u => u.HasWhatsApp).NotNull().WithMessage(Errors.RequiredField);
-
-                RuleFor(u => u.Address).NotEmpty().WithMessage(Errors.RequiredField)
-                .MaximumLength(500).WithMessage(Errors.MaxLength);
-
-                RuleFor(u => u.MobileNumber).NotEmpty().WithMessage(Errors.RequiredField)
-                .MaximumLength(11).WithMessage(Errors.MaxLength)
-                .Matches(RegexPatterns.MobileNumber).WithMessage(Errors.InvalidMobileNumber);
+                Include(new SharedUserValidator(_userRepository));
             });
 
             When(u => u.UserType.ToLower() == AppRoles.Seller.ToLower(), () =>
             {
-                RuleFor(u => u.HasWhatsApp).NotNull().WithMessage(Errors.RequiredField);
+                Include(new SharedUserValidator(_userRepository));
 
-                RuleFor(u => u.Address).NotEmpty().WithMessage(Errors.RequiredField)
-                .MaximumLength(500).WithMessage(Errors.MaxLength);
-
-                RuleFor(u => u.MobileNumber).NotEmpty().WithMessage(Errors.RequiredField)
-                .MustAsync(async (mobile, cancellationToken) =>
-                !await _userRepository.IsExistsAsync(u => u.PhoneNumber == mobile))
-                .WithMessage(Errors.Duplicated)
-
-                .MaximumLength(11).WithMessage(Errors.MaxLength)
-                .Matches(RegexPatterns.MobileNumber).WithMessage(Errors.InvalidMobileNumber);
-
-                RuleFor(u => u.NationalId).NotEmpty().WithMessage(Errors.RequiredField)
+                RuleFor(u => u.NationalId)
+                .NotEmpty().WithMessage(Errors.RequiredField)
+                .MaximumLength(14).WithMessage(Errors.MaxLength)
+                .Matches(RegexPatterns.NationalId).WithMessage(Errors.InvalidNationalId)
                 .MustAsync(async (nationalId, cancellationToken) =>
                 !await _userRepository.IsExistsAsync(u => u.NationalId == nationalId))
-                .WithMessage(Errors.Duplicated)
+                .WithMessage(Errors.Duplicated);
 
-                .MaximumLength(14).WithMessage(Errors.MaxLength)
-                .Matches(RegexPatterns.NationalId).WithMessage(Errors.InvalidNationalId);
-
-                RuleFor(u => u.Bio).NotEmpty().WithMessage(Errors.RequiredField)
+                RuleFor(u => u.Bio)
+                .NotEmpty().WithMessage(Errors.RequiredField)
                 .Length(20, 100).WithMessage(Errors.MaxMinLength);
             });
         }

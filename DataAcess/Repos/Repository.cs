@@ -77,7 +77,7 @@ namespace DataAcess.Repos
         public Task<bool> IsExistsAsync(Expression<Func<T, bool>> filter)
         {
             IQueryable<T> query = DbSet;
-			return query.Where(filter).AnyAsync();
+			return query.AnyAsync(filter);
         }
     }
 }
