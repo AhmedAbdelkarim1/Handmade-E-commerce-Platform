@@ -39,7 +39,7 @@ namespace IdentityManagerAPI.Controllers
 		public async Task<IActionResult> GetUser([FromRoute] string id)
 		{
 			var user = await userService.GetById(id);
-			return Ok(user);
+            return Ok(user);
 		}
 
 		[HttpPost]

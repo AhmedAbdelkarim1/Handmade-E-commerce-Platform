@@ -11,6 +11,7 @@ using Models.Const;
 using Models.Domain;
 using Models.DTOs.Auth;
 using Models.DTOs.User;
+using DataAcess.CustomExceptions;
 
 
 namespace DataAcess.Repos
@@ -43,7 +44,7 @@ namespace DataAcess.Repos
 		public async Task<ApplicationUser> GetUserByID(string userID)
 		{
 			var user = await db.ApplicationUser.Include(u => u.Image).FirstOrDefaultAsync(u => u.Id == userID);
-			return user ?? throw new InvalidOperationException("User not found.");
+			return user ?? throw new NotFoundException("User not found");
 		}
 
 		public async Task<bool> IsUniqueUserName(string username)
