@@ -1,4 +1,4 @@
-﻿using Ardalis.GuardClauses;
+﻿using DataAcess.CustomExceptions;
 using FluentValidation;
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
@@ -6,14 +6,14 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace IdentityManagerAPI.Middlewares
 {
-    public class GlobalExceptionHandler : IExceptionHandler
+    public class GlobalExceptionHandler(IProblemDetailsService problemDetailsService) : IExceptionHandler
     {
+        private readonly IProblemDetailsService _problemDetailsService = problemDetailsService;
+
         public async ValueTask<bool> TryHandleAsync(HttpContext httpContext, Exception exception, CancellationToken cancellationToken)
         {
-            // Create a standard ProblemDetails response
             var problemDetails = new ProblemDetails();
 
-            // Here we check the type of the exception and customize the response
             switch (exception)
             {
                 case ValidationException validationException:
@@ -24,10 +24,8 @@ namespace IdentityManagerAPI.Middlewares
                         .GroupBy(e => e.PropertyName)
                         .ToDictionary(g => g.Key, g => g.Select(e => e.ErrorMessage).ToArray());
 
-                    httpContext.Response.StatusCode = StatusCodes.Status400BadRequest;
-                    await httpContext.Response.WriteAsJsonAsync(new { problemDetails, errors }, cancellationToken);
-                    return true; 
-
+                    problemDetails.Extensions["errors"] = errors;
+                    break;
                 case NotFoundException notFoundException:
                     problemDetails.Title = "Resource Not Found";
                     problemDetails.Status = StatusCodes.Status404NotFound;
@@ -42,9 +40,12 @@ namespace IdentityManagerAPI.Middlewares
             }
 
             httpContext.Response.StatusCode = problemDetails.Status.Value;
-            await httpContext.Response.WriteAsJsonAsync(problemDetails, cancellationToken);
-
-            return true; 
+            return await _problemDetailsService.TryWriteAsync(new ProblemDetailsContext
+            {
+                HttpContext = httpContext,
+                ProblemDetails = problemDetails,
+                Exception = exception,
+            });
         }
     }
 }
