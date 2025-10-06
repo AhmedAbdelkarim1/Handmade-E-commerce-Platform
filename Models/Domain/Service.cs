@@ -7,8 +7,6 @@ namespace Models.Domain
 		public int Id { get; set; }
 
 		[ForeignKey("Seller")]
-
-
 		public string SellerId { get; set; }
 		public ApplicationUser Seller { get; set; }
 

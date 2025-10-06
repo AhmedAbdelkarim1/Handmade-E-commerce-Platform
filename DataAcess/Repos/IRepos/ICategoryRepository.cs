@@ -1,16 +1,16 @@
 ﻿using Models.Domain;
+using Models.DTOs.Categories;
 
 namespace DataAcess.Repos.IRepos
 {
 	public interface ICategoryRepository
 	{
-		Task<IEnumerable<Category>> GetAllAsync();
-		Task<Category> GetByIdAsync(int id);
+		Task<IEnumerable<CategoryDto>> GetAllAsync();
+		Task<CategoryDto> GetByIdForDisplayAsync(int id);
+		Task<Category> GetByIdForTrackingAsync(int id);
 		Task<Category> AddAsync(Category category);
 		Task<Category> UpdateAsync(Category category);
-		Task<bool> DeleteAsync(int id);
-		IEnumerable<Category> SearchByName(string name);
-
-
+		Task DeleteAsync(int id);
+        Task<Category> SearchByName(string name);
 	}
 }

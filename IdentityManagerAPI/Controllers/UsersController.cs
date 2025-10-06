@@ -62,7 +62,7 @@ namespace IdentityManagerAPI.Controllers
 		}
 
 		[HttpDelete("{id}")]
-		[Authorize(Roles = "Admin")]
+		[Authorize(Roles = "Admin")]  
 		public async Task<IActionResult> DeleteUser([FromRoute] string id)
 		{
 			await userService.DeleteUser(id);

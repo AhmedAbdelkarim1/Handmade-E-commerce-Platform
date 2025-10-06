@@ -1,6 +1,10 @@
-﻿using DataAcess.Repos.IRepos;
+﻿using DataAcess.CustomExceptions;
+using DataAcess.Repos.IRepos;
 using Microsoft.EntityFrameworkCore;
+using Models.Const;
 using Models.Domain;
+using Models.DTOs.Categories;
+using System.Threading.Tasks;
 
 namespace DataAcess.Repos
 {
@@ -12,9 +16,43 @@ namespace DataAcess.Repos
 			_db = db;
 		}
 
-		public async Task<IEnumerable<Category>> GetAllAsync() => await _db.Categories.Where(c => !c.IsDeleted).Include(a => a.Services).AsNoTracking().ToListAsync();
+		public async Task<IEnumerable<CategoryDto>> GetAllAsync()
+		{
+			var categories = await _db.Categories
+				.Where(c => !c.IsDeleted)
+				.Select(c => new CategoryDto
+				{
+					Name = c.Name,
+					Id = c.Id,
+					ImageUrl = !c.ImageId.HasValue ? null : c.Image!.FilePath,
+					serviceCount = c.Services!.Count,
+				})
+				
+				.AsNoTracking().ToListAsync();
+			return categories;
+		}
 
-		public async Task<Category> GetByIdAsync(int id) => await _db.Categories.Include(s => s.Services).FirstOrDefaultAsync(c => c.Id == id);
+
+		public async Task<CategoryDto> GetByIdForDisplayAsync(int id)
+		{
+			return await _db.Categories
+				.Where(c => !c.IsDeleted)
+				.Select(c => new CategoryDto
+				{
+                    Name = c.Name,
+                    Id = c.Id,
+                    ImageUrl = !c.ImageId.HasValue ? null : c.Image!.FilePath,
+                    serviceCount = c.Services!.Count,
+                })
+				.FirstOrDefaultAsync(c => c.Id == id)
+				?? throw new NotFoundException("Category not found");
+        }
+
+		public async Task<Category> GetByIdForTrackingAsync(int id)
+		{
+			return await _db.Categories.FirstOrDefaultAsync(c => c.Id == id)
+				?? throw new NotFoundException("Category not found");
+        }
 
 		public async Task<Category> AddAsync(Category category)
 		{
@@ -30,20 +68,26 @@ namespace DataAcess.Repos
 			return category;
 		}
 
-		public async Task<bool> DeleteAsync(int id)
+		public async Task DeleteAsync(int id)
 		{
 			var category = await _db.Categories.FindAsync(id);
-			if (category == null) return false;
-			category.IsDeleted = !category.IsDeleted;
-			_db.Categories.Update(category);
+			if (category == null)
+                throw new NotFoundException("Category not found");
+
+			category.IsDeleted = true;
 			await _db.SaveChangesAsync();
-			return true;
 		}
 
-		public IEnumerable<Category> SearchByName(string name)
+		public async Task<Category> SearchByName(string name)
 		{
-			var searched = _db.Categories.Where(c => c.Name.Contains(name)).ToList();
-			return searched;
+			var searchTerm = name.Trim().ToLower();
+			var category = await _db.Categories
+				.FirstOrDefaultAsync(c => c.Name.ToLower().Contains(searchTerm));
+
+			if (category is null )
+				throw new NotFoundException("Category not found");
+
+			return category;
 		}
 	}
 
