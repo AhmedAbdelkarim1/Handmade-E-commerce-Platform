@@ -8,7 +8,7 @@ namespace IdentityManager.Services.ControllerService.IControllerService
 		Task<CategoryDto> GetByIdAsync(int id);
 		Task<CategoryDto> CreateAsync(string? userId, CreateCategoryDto dto);
 		Task<CategoryDto> UpdateAsync(string? userId, int id, UpdateCategoryDto dto);
-		Task<bool> DeleteAsync(int id);
-		IEnumerable<CategoryDto> SearchByName(string name);
+		Task DeleteAsync(int id);
+        Task<CategoryDto> SearchByName(string name);
 	}
 }

@@ -3,6 +3,7 @@ using DataAcess.Repos.IRepos;
 using IdentityManager.Services.ControllerService.IControllerService;
 using Models.Domain;
 using Models.DTOs.Categories;
+using System.Threading.Tasks;
 
 namespace IdentityManager.Services.ControllerService
 {
@@ -23,21 +24,19 @@ namespace IdentityManager.Services.ControllerService
 		{
 			Id = c.Id,
 			Name = c.Name,
-			ImageUrl = c.ImageId.HasValue ? _imageService.GetImageUrl(c.ImageId.Value) : null
-			,
-			serviceCount = c.Services?.Count ?? 0
+			ImageUrl = c.ImageId.HasValue ? _imageService.GetImageUrl(c.ImageId.Value) : null,
 		};
 
 		public async Task<IEnumerable<CategoryDto>> GetAllAsync()
 		{
 			var list = await _repo.GetAllAsync();
-			return list.Select(c => ToDto(c));
+			return list;
 		}
 
-		public async Task<CategoryDto?> GetByIdAsync(int id)
+		public async Task<CategoryDto> GetByIdAsync(int id)
 		{
-			var cat = await _repo.GetByIdAsync(id);
-			return cat == null ? null : ToDto(cat);
+			var cat = await _repo.GetByIdForDisplayAsync(id);
+			return cat;
 		}
 
 		public async Task<CategoryDto> CreateAsync(string? userId, CreateCategoryDto dto)
@@ -70,10 +69,9 @@ namespace IdentityManager.Services.ControllerService
 			return ToDto(saved);
 		}
 
-		public async Task<CategoryDto?> UpdateAsync(string? userId, int id, UpdateCategoryDto dto)
+		public async Task<CategoryDto> UpdateAsync(string? userId, int id, UpdateCategoryDto dto)
 		{
-			var existing = await _repo.GetByIdAsync(id);
-			if (existing == null) return null;
+			var existing = await _repo.GetByIdForTrackingAsync(id);
 
 			existing.Name = dto.Name;
 			existing.LastUpdatedOn = DateTime.Now;
@@ -95,16 +93,16 @@ namespace IdentityManager.Services.ControllerService
 			}
 
 			var updated = await _repo.UpdateAsync(existing);
-			return updated == null ? null : ToDto(updated);
+			return ToDto(updated);
 		}
 
 
-		public async Task<bool> DeleteAsync(int id) => await _repo.DeleteAsync(id);
+		public async Task DeleteAsync(int id) => await _repo.DeleteAsync(id);
 
-		public IEnumerable<CategoryDto> SearchByName(string name)
+		public async Task<CategoryDto> SearchByName(string name)
 		{
-			var cats = _repo.SearchByName(name);
-			return cats.Select(c => ToDto(c));
+			var category = await _repo.SearchByName(name);
+			return ToDto(category);
 		}
 	}
 }

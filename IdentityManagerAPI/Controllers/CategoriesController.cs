@@ -1,4 +1,8 @@
-﻿using System.Security.Claims;
+﻿using System.Runtime.CompilerServices;
+using System.Security.Claims;
+using System.Threading.Tasks;
+using DataAcess.CustomExceptions;
+using FluentValidation;
 using IdentityManager.Services.ControllerService.IControllerService;
 using Microsoft.AspNetCore.Mvc;
 using Models.DTOs.Categories;
@@ -10,12 +14,14 @@ namespace IdentityManagerAPI.Controllers
 	public class CategoriesController : ControllerBase
 	{
 		private readonly ICategoryService _service;
-		public CategoriesController(ICategoryService service)
-		{
-			_service = service;
-		}
+		private readonly IValidator<CategorySearchDto> _validator;
+        public CategoriesController(ICategoryService service, IValidator<CategorySearchDto> validator)
+        {
+            _service = service;
+            _validator = validator;
+        }
 
-		[HttpGet]
+        [HttpGet]
 		public async Task<IActionResult> GetAll()
 			=> Ok(await _service.GetAllAsync());
 
@@ -23,7 +29,6 @@ namespace IdentityManagerAPI.Controllers
 		public async Task<IActionResult> GetById(int id)
 		{
 			var category = await _service.GetByIdAsync(id);
-			if (category == null) return NotFound();
 			return Ok(category);
 		}
 
@@ -45,13 +50,19 @@ namespace IdentityManagerAPI.Controllers
 
 		[HttpDelete("{id}")]
 		public async Task<IActionResult> Delete(int id)
-			=> Ok(await _service.DeleteAsync(id));
-
-		[HttpGet("search/{name}")]
-		public IActionResult SearchByName(string name)
 		{
-			if (string.IsNullOrEmpty(name)) return NotFound();
-			var res = _service.SearchByName(name);
+			await _service.DeleteAsync(id);
+			return NoContent();
+        }
+
+		[HttpGet("search")]
+		public async Task<IActionResult> SearchByName([FromQuery]CategorySearchDto request)
+		{
+			var validationResult = await _validator.ValidateAsync(request);
+			if (!validationResult.IsValid)
+				throw new ValidationException(validationResult.Errors);
+
+			var res = await _service.SearchByName(request.Name);
 			return Ok(res);
 		}
 	}
