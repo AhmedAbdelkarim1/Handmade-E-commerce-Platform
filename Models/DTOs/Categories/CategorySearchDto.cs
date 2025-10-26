@@ -8,6 +8,6 @@ namespace Models.DTOs.Categories
 {
     public class CategorySearchDto
     {
-        public string Name { get; set; }
+        public string Name { get; set; } = string.Empty;
     }
 }

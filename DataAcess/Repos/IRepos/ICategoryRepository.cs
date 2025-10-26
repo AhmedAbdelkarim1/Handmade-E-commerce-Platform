@@ -11,6 +11,6 @@ namespace DataAcess.Repos.IRepos
 		Task<Category> AddAsync(Category category);
 		Task<Category> UpdateAsync(Category category);
 		Task DeleteAsync(int id);
-        Task<Category> SearchByName(string name);
+        Task<IEnumerable<Category>> SearchByName(string name);
 	}
 }
