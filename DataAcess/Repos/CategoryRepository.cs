@@ -27,7 +27,6 @@ namespace DataAcess.Repos
 					ImageUrl = !c.ImageId.HasValue ? null : c.Image!.FilePath,
 					serviceCount = c.Services!.Count,
 				})
-				
 				.AsNoTracking().ToListAsync();
 			return categories;
 		}
@@ -78,16 +77,14 @@ namespace DataAcess.Repos
 			await _db.SaveChangesAsync();
 		}
 
-		public async Task<Category> SearchByName(string name)
+		public async Task<IEnumerable<Category>> SearchByName(string name)
 		{
-			var searchTerm = name.Trim().ToLower();
-			var category = await _db.Categories
-				.FirstOrDefaultAsync(c => c.Name.ToLower().Contains(searchTerm));
+			var categories = await _db.Categories
+				.Where(c => c.Name.Contains(name))
+				.AsNoTracking()
+				.ToListAsync();
 
-			if (category is null )
-				throw new NotFoundException("Category not found");
-
-			return category;
+			return categories;
 		}
 	}
 

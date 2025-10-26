@@ -31,8 +31,9 @@ namespace Models.DTOs.Mapper
 			//}).ReverseMap();
 			//Category
 			CreateMap<CreateCategoryDto, Category>().ReverseMap();
+			CreateMap<CategoryDto, Category>().ReverseMap();
 
-			// Product
+			// Product	
 			CreateMap<Models.Domain.Product, ProductDisplayDTO>()
 
 				.AfterMap((src, dest) =>

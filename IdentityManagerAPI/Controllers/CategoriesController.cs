@@ -1,7 +1,4 @@
-﻿using System.Runtime.CompilerServices;
-using System.Security.Claims;
-using System.Threading.Tasks;
-using DataAcess.CustomExceptions;
+﻿using System.Security.Claims;
 using FluentValidation;
 using IdentityManager.Services.ControllerService.IControllerService;
 using Microsoft.AspNetCore.Mvc;
@@ -35,8 +32,11 @@ namespace IdentityManagerAPI.Controllers
 		[HttpPost]
 		public async Task<IActionResult> Create([FromForm] CreateCategoryDto dto)
 		{
+			//var validationResult = await _validator.ValidateAsync(dto);
 			var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-			return Ok(await _service.CreateAsync(userId, dto));
+			var createdUser = await _service.CreateAsync(userId, dto);
+
+            return CreatedAtAction(nameof(GetById),new { id = createdUser.Id },createdUser);
 		}
 
 		[HttpPut("{id}")]
@@ -62,8 +62,8 @@ namespace IdentityManagerAPI.Controllers
 			if (!validationResult.IsValid)
 				throw new ValidationException(validationResult.Errors);
 
-			var res = await _service.SearchByName(request.Name);
-			return Ok(res);
+			var searchResult = await _service.SearchByName(request.Name);
+			return Ok(searchResult);
 		}
 	}
 }

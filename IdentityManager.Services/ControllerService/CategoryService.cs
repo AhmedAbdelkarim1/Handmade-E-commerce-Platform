@@ -99,10 +99,15 @@ namespace IdentityManager.Services.ControllerService
 
 		public async Task DeleteAsync(int id) => await _repo.DeleteAsync(id);
 
-		public async Task<CategoryDto> SearchByName(string name)
+		public async Task<IEnumerable<CategoryDto>> SearchByName(string name)
 		{
-			var category = await _repo.SearchByName(name);
-			return ToDto(category);
+			if(string.IsNullOrWhiteSpace(name))
+				return Enumerable.Empty<CategoryDto>();
+
+            var searchTerm = name.Trim();
+            var categories = await _repo.SearchByName(searchTerm);
+			var dto = _mapper.Map<IEnumerable<CategoryDto>>(categories);
+			return dto;
 		}
 	}
 }
